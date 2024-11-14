@@ -1,3 +1,5 @@
+import { ThemeType } from './theme';
+
 // 卫生用品类型
 export enum ProductType {
     PAD = 'pad',
@@ -29,6 +31,7 @@ export interface UserSettings {
     reminderInterval: number; // 分钟
     nightModeEnabled: boolean;
     notificationsEnabled: boolean;
+    theme?: ThemeType; // 主题设置
 }
 
 // 症状类型

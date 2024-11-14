@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, Card, FAB, Portal, Dialog, Button, RadioButton, Snackbar } from 'react-native-paper';
+import { Text, Card, FAB, Portal, Dialog, Button, RadioButton, Snackbar, useTheme } from 'react-native-paper';
 import { useUsageRecords, useSettings } from '../hooks/useStorage';
 import { useNotifications } from '../hooks/useNotification';
 import { ProductType } from '../types';
@@ -10,6 +10,7 @@ export default function HomeScreen() {
     const { settings } = useSettings();
     const [dialogVisible, setDialogVisible] = useState(false);
     const [selectedType, setSelectedType] = useState<ProductType>(ProductType.PAD);
+    const theme = useTheme();
 
     const { scheduleReminder } = useNotifications();
     const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -21,7 +22,6 @@ export default function HomeScreen() {
         });
 
         if (success) {
-            // 记录成功后，调度下一次提醒
             await scheduleReminder();
             setSnackbarVisible(true);
         }
@@ -39,8 +39,8 @@ export default function HomeScreen() {
     };
 
     return (
-        <View style={styles.container}>
-            <Card style={styles.card}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <Card style={[styles.card, { backgroundColor: theme.colors.cardBackground }]}>
                 <Card.Title title="使用状态" />
                 <Card.Content>
                     <Text variant="bodyMedium">
@@ -52,14 +52,18 @@ export default function HomeScreen() {
             </Card>
 
             <FAB
-                style={styles.fab}
+                style={[styles.fab, { backgroundColor: theme.colors.fabBackground }]}
                 icon="plus"
                 onPress={() => setDialogVisible(true)}
                 label="记录更换"
             />
 
             <Portal>
-                <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
+                <Dialog
+                    visible={dialogVisible}
+                    onDismiss={() => setDialogVisible(false)}
+                    style={{ backgroundColor: theme.colors.dialogBackground }}
+                >
                     <Dialog.Title>选择使用的卫生用品</Dialog.Title>
                     <Dialog.Content>
                         <RadioButton.Group
@@ -72,8 +76,18 @@ export default function HomeScreen() {
                         </RadioButton.Group>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <Button onPress={() => setDialogVisible(false)}>取消</Button>
-                        <Button onPress={handleAddRecord}>确认</Button>
+                        <Button
+                            onPress={() => setDialogVisible(false)}
+                            textColor={theme.colors.text}
+                        >
+                            取消
+                        </Button>
+                        <Button
+                            onPress={handleAddRecord}
+                            textColor={theme.colors.primary}
+                        >
+                            确认
+                        </Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
@@ -82,6 +96,7 @@ export default function HomeScreen() {
                 visible={snackbarVisible}
                 onDismiss={() => setSnackbarVisible(false)}
                 duration={3000}
+                style={{ backgroundColor: theme.colors.surface }}
                 action={{
                     label: '关闭',
                     onPress: () => setSnackbarVisible(false),

@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { List, Switch, Divider, Text } from 'react-native-paper';
+import { List, Switch, Divider, Text, Portal, Dialog, TouchableRipple } from 'react-native-paper';
 import { useSettings } from '../hooks/useStorage';
+import { useThemeContext } from '../contexts/ThemeContext';
+import { themeNames } from '../themes';
+import type { ThemeType } from '../types/theme';
 
 export default function ProfileScreen() {
     const { settings, updateSettings } = useSettings();
+    const { theme, setTheme } = useThemeContext();
+    const [themeDialogVisible, setThemeDialogVisible] = useState(false);
 
     if (!settings) {
         return (
@@ -16,6 +21,17 @@ export default function ProfileScreen() {
 
     return (
         <View style={styles.container}>
+            <List.Section>
+                <List.Subheader>主题设置</List.Subheader>
+                <List.Item
+                    title="颜色主题"
+                    description={themeNames[theme]}
+                    onPress={() => setThemeDialogVisible(true)}
+                    right={props => <List.Icon {...props} icon="chevron-right" />}
+                />
+                <Divider />
+            </List.Section>
+
             <List.Section>
                 <List.Subheader>提醒设置</List.Subheader>
                 <List.Item
@@ -51,6 +67,35 @@ export default function ProfileScreen() {
                     }}
                 />
             </List.Section>
+
+            <Portal>
+                <Dialog
+                    visible={themeDialogVisible}
+                    onDismiss={() => setThemeDialogVisible(false)}
+                >
+                    <Dialog.Title>选择主题</Dialog.Title>
+                    <Dialog.Content>
+                        {Object.entries(themeNames).map(([value, label]) => (
+                            <TouchableRipple
+                                key={value}
+                                onPress={() => {
+                                    setTheme(value as ThemeType);
+                                    setThemeDialogVisible(false);
+                                }}
+                            >
+                                <List.Item
+                                    title={label}
+                                    right={props =>
+                                        theme === value ? (
+                                            <List.Icon {...props} icon="check" />
+                                        ) : null
+                                    }
+                                />
+                            </TouchableRipple>
+                        ))}
+                    </Dialog.Content>
+                </Dialog>
+            </Portal>
         </View>
     );
 }

@@ -5,7 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import Icon from '@expo/vector-icons/MaterialCommunityIcons';  // 修改图标导入
+import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { useTheme } from 'react-native-paper';
 
 const Tab = createBottomTabNavigator();
@@ -18,10 +18,17 @@ export default function AppNavigator() {
             <Tab.Navigator
                 screenOptions={{
                     tabBarActiveTintColor: theme.colors.primary,
+                    tabBarInactiveTintColor: theme.colors.placeholder,
                     headerStyle: {
                         backgroundColor: theme.colors.surface,
                     },
                     headerTintColor: theme.colors.primary,
+                    headerTitleStyle: {
+                        color: theme.colors.text,
+                    },
+                    tabBarStyle: {
+                        backgroundColor: theme.colors.background,
+                    },
                 }}>
                 <Tab.Screen
                     name="首页"
