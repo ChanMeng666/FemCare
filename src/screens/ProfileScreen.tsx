@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { List, Switch, Divider, Text, Portal, Dialog, TouchableRipple } from 'react-native-paper';
+import { List, Switch, Divider, Text, Portal, Dialog, TouchableRipple, useTheme } from 'react-native-paper';
 import { useSettings } from '../hooks/useStorage';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { themeNames } from '../themes';
 import type { ThemeType } from '../types/theme';
+import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function ProfileScreen() {
     const { settings, updateSettings } = useSettings();
-    const { theme, setTheme } = useThemeContext();
+    const { theme: currentTheme, setTheme } = useThemeContext();
     const [themeDialogVisible, setThemeDialogVisible] = useState(false);
+    const theme = useTheme();
 
     if (!settings) {
         return (
@@ -20,14 +22,20 @@ export default function ProfileScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <List.Section>
-                <List.Subheader>主题设置</List.Subheader>
+                <List.Subheader
+                    style={{ color: theme.colors.text }}
+                >
+                    主题设置
+                </List.Subheader>
                 <List.Item
                     title="颜色主题"
-                    description={themeNames[theme]}
+                    titleStyle={{ color: theme.colors.text }}
+                    description={themeNames[currentTheme]}
+                    descriptionStyle={{ color: theme.colors.text }}
                     onPress={() => setThemeDialogVisible(true)}
-                    right={props => <List.Icon {...props} icon="chevron-right" />}
+                    right={props => <List.Icon {...props} icon="chevron-right" color={theme.colors.text} />}
                 />
                 <Divider />
             </List.Section>
@@ -72,8 +80,22 @@ export default function ProfileScreen() {
                 <Dialog
                     visible={themeDialogVisible}
                     onDismiss={() => setThemeDialogVisible(false)}
+                    style={[
+                        styles.dialog,
+                        {
+                            backgroundColor: theme.colors.surface,
+                            borderRadius: 28,
+                        }
+                    ]}
                 >
-                    <Dialog.Title>选择主题</Dialog.Title>
+                    <Dialog.Title
+                        style={{
+                            color: theme.colors.text,
+                            textAlign: 'center',
+                        }}
+                    >
+                        选择主题
+                    </Dialog.Title>
                     <Dialog.Content>
                         {Object.entries(themeNames).map(([value, label]) => (
                             <TouchableRipple
@@ -82,15 +104,28 @@ export default function ProfileScreen() {
                                     setTheme(value as ThemeType);
                                     setThemeDialogVisible(false);
                                 }}
+                                style={styles.themeOption}
                             >
-                                <List.Item
-                                    title={label}
-                                    right={props =>
-                                        theme === value ? (
-                                            <List.Icon {...props} icon="check" />
-                                        ) : null
-                                    }
-                                />
+                                {/*<List.Item*/}
+                                {/*    title={label}*/}
+                                {/*    right={props =>*/}
+                                {/*        theme === value ? (*/}
+                                {/*            <List.Icon {...props} icon="check" />*/}
+                                {/*        ) : null*/}
+                                {/*    }*/}
+                                {/*/>*/}
+                                <View style={styles.themeOptionContent}>
+                                    <Text style={{ color: theme.colors.text }}>
+                                        {label}
+                                    </Text>
+                                    {currentTheme === value && (
+                                        <Icon
+                                            name="check"
+                                            size={24}
+                                            color={theme.colors.primary}
+                                        />
+                                    )}
+                                </View>
                             </TouchableRipple>
                         ))}
                     </Dialog.Content>
@@ -103,6 +138,17 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+    },
+    dialog: {
+        marginHorizontal: 24,
+    },
+    themeOption: {
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+    },
+    themeOptionContent: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
 });

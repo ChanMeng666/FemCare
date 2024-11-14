@@ -16,10 +16,34 @@ export default function CalendarScreen() {
         const dateString = format(new Date(record.timestamp), 'yyyy-MM-dd');
         acc[dateString] = {
             marked: true,
-            dotColor: theme.colors.calendarDot
+            dotColor: theme.colors.calendarDot,
+            selectedColor: theme.colors.calendarSelected,
         };
         return acc;
     }, {});
+
+    // 如果有选中日期，添加选中状态
+    if (selectedDate) {
+        markedDates[selectedDate] = {
+            ...markedDates[selectedDate],
+            selected: true,
+            selectedColor: theme.colors.calendarSelected,
+        };
+    }
+
+    const today = format(new Date(), 'yyyy-MM-dd');
+    if (markedDates[today]) {
+        markedDates[today] = {
+            ...markedDates[today],
+            selectedColor: theme.colors.calendarToday,
+        };
+    } else {
+        markedDates[today] = {
+            selected: true,
+            selectedColor: theme.colors.calendarToday,
+        };
+    }
+
 
     return (
         <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -30,21 +54,60 @@ export default function CalendarScreen() {
                     setDialogVisible(true);
                 }}
                 theme={{
+                    backgroundColor: theme.colors.background,
+                    calendarBackground: theme.colors.background,
+                    textSectionTitleColor: theme.colors.primary,
                     selectedDayBackgroundColor: theme.colors.calendarSelected,
-                    todayTextColor: theme.colors.calendarToday,
+                    selectedDayTextColor: '#ffffff',
+                    todayTextColor: theme.colors.primary,
+                    todayBackgroundColor: 'transparent',
+                    dayTextColor: theme.colors.text,
+                    textDisabledColor: theme.colors.placeholder,
+                    dotColor: theme.colors.calendarDot,
+                    selectedDotColor: '#ffffff',
                     arrowColor: theme.colors.primary,
                     monthTextColor: theme.colors.text,
+                    indicatorColor: theme.colors.primary,
                     textDayFontSize: 16,
                     textMonthFontSize: 16,
-                    textDayHeaderFontSize: 16,
-                    selectedDotColor: theme.colors.background,
+                    textDayHeaderFontSize: 14,
+                    'stylesheet.calendar.header': {
+                        week: {
+                            marginTop: 5,
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                        },
+                        arrow: {
+                            padding: 10,
+                        },
+                        dayHeader: {
+                            color: theme.colors.text,
+                            fontSize: 14,
+                            marginBottom: 10,
+                        },
+                        monthText: {
+                            color: theme.colors.text,
+                            fontSize: 16,
+                            fontWeight: '600',
+                        },
+                    },
                 }}
+                enableSwipeMonths={true}
             />
 
-            <Card style={[styles.card, { backgroundColor: theme.colors.cardBackground }]}>
-                <Card.Title title="本月统计" />
+            <Card
+                style={[styles.card, { backgroundColor: theme.colors.cardBackground }]}
+                mode="outlined"
+            >
+                <Card.Title
+                    title="本月统计"
+                    titleStyle={{ color: theme.colors.text }}
+                />
                 <Card.Content>
-                    <Text variant="bodyMedium">
+                    <Text
+                        variant="bodyMedium"
+                        style={{ color: theme.colors.text }}
+                    >
                         更换次数: {Object.keys(markedDates).length}
                     </Text>
                 </Card.Content>
@@ -56,17 +119,41 @@ export default function CalendarScreen() {
                     onDismiss={() => setDialogVisible(false)}
                     style={{ backgroundColor: theme.colors.dialogBackground }}
                 >
-                    <Dialog.Title>添加记录</Dialog.Title>
+                    <Dialog.Title style={{ color: theme.colors.text }}>
+                        添加记录
+                    </Dialog.Title>
                     <Dialog.Content>
                         <RadioButton.Group onValueChange={() => {}} value="">
-                            <RadioButton.Item label="轻度" value="light" />
-                            <RadioButton.Item label="中度" value="medium" />
-                            <RadioButton.Item label="重度" value="heavy" />
+                            <RadioButton.Item
+                                label="轻度"
+                                value="light"
+                                labelStyle={{ color: theme.colors.text }}
+                            />
+                            <RadioButton.Item
+                                label="中度"
+                                value="medium"
+                                labelStyle={{ color: theme.colors.text }}
+                            />
+                            <RadioButton.Item
+                                label="重度"
+                                value="heavy"
+                                labelStyle={{ color: theme.colors.text }}
+                            />
                         </RadioButton.Group>
                     </Dialog.Content>
                     <Dialog.Actions>
-                        <Button onPress={() => setDialogVisible(false)}>取消</Button>
-                        <Button onPress={() => setDialogVisible(false)}>保存</Button>
+                        <Button
+                            onPress={() => setDialogVisible(false)}
+                            textColor={theme.colors.text}
+                        >
+                            取消
+                        </Button>
+                        <Button
+                            onPress={() => setDialogVisible(false)}
+                            textColor={theme.colors.primary}
+                        >
+                            保存
+                        </Button>
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
@@ -80,5 +167,6 @@ const styles = StyleSheet.create({
     },
     card: {
         margin: 16,
+        elevation: 2,
     },
 });
