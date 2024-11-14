@@ -467,7 +467,7 @@ const MOOD_ICONS = {
     [MoodType.SAD]: { icon: 'emoticon-sad-outline', label: '低落' },
     [MoodType.ANGRY]: { icon: 'emoticon-angry-outline', label: '烦躁' },
     [MoodType.ANXIOUS]: { icon: 'emoticon-confused-outline', label: '焦虑' },
-    [MoodType.TIRED]: { icon: 'emoticon-tired-outline', label: '疲惫' },
+    [MoodType.TIRED]: { icon: 'emoticon-sick-outline', label: '疲惫' },
 };
 
 const SYMPTOM_ICONS = {

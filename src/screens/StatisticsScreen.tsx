@@ -377,7 +377,7 @@
 // });
 
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Pressable } from 'react-native';
 import { Card } from '../components/base/Card';
 import { Typography } from '../components/base/Typography';
@@ -385,20 +385,14 @@ import { Button } from '../components/base/Button';
 import { useTheme } from '../hooks/useTheme';
 import { useUsageRecords } from '../hooks/useStorage';
 import { format, subDays, eachDayOfInterval, isSameDay } from 'date-fns';
-import {
-    VictoryChart,
-    VictoryLine,
-    VictoryAxis,
-    VictoryBar,
-    VictoryPie,
-    VictoryLabel,
-    VictoryScatter,
-} from 'victory-native';
+import { LineChart, PieChart, BarChart } from 'react-native-chart-kit';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { ProductType } from '../types';
 import Animated, {
     useAnimatedStyle,
     withSpring,
     useSharedValue,
+    withTiming,
 } from 'react-native-reanimated';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -471,11 +465,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
 export default function StatisticsScreen() {
     const theme = useTheme();
     const { records } = useUsageRecords();
-    const [timeRange, setTimeRange] = useState(TIME_RANGES[1]); // 默认选择月视图
-    const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-
-    // 图表动画值
-    const chartScale = useSharedValue(1);
+    const [timeRange, setTimeRange] = useState(TIME_RANGES[1]);
 
     // 处理数据
     const {
@@ -489,7 +479,6 @@ export default function StatisticsScreen() {
         const startDate = subDays(endDate, timeRange.days);
         const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
 
-        // 使用记录数据
         const usage = dateRange.map(date => {
             const dayRecords = records.filter(r => isSameDay(new Date(r.timestamp), date));
             return {
@@ -498,13 +487,11 @@ export default function StatisticsScreen() {
             };
         });
 
-        // 产品分布
         const distribution = records.reduce((acc: any, record) => {
             acc[record.productType] = (acc[record.productType] || 0) + 1;
             return acc;
         }, {});
 
-        // 计算平均间隔
         let totalInterval = 0;
         let intervalCount = 0;
         for (let i = 1; i < records.length; i++) {
@@ -513,14 +500,15 @@ export default function StatisticsScreen() {
             intervalCount++;
         }
 
-        // 使用对比（与上一周期比较）
         const prevPeriodUsage = records.filter(r =>
             r.timestamp >= subDays(startDate, timeRange.days).getTime() &&
             r.timestamp < startDate.getTime()
         ).length;
+
         const currentPeriodUsage = records.filter(r =>
             r.timestamp >= startDate.getTime()
         ).length;
+
         const usageChange = prevPeriodUsage
             ? ((currentPeriodUsage - prevPeriodUsage) / prevPeriodUsage) * 100
             : 0;
@@ -528,19 +516,16 @@ export default function StatisticsScreen() {
         return {
             usageData: usage,
             productDistribution: Object.entries(distribution).map(([key, value]) => ({
-                x: key,
-                y: value,
+                name: key,
+                population: value,
+                color: theme.colors.primary.main,
+                legendFontColor: theme.colors.text.primary,
             })),
             averageInterval: intervalCount ? Math.round(totalInterval / intervalCount) : 0,
             totalUsage: currentPeriodUsage,
             usageComparison: usageChange,
         };
-    }, [records, timeRange]);
-
-    // 图表样式
-    const chartStyle = useAnimatedStyle(() => ({
-        transform: [{ scale: chartScale.value }],
-    }));
+    }, [records, timeRange, theme]);
 
     // 渲染时间范围选择器
     const renderTimeRangeSelector = () => (
@@ -558,7 +543,7 @@ export default function StatisticsScreen() {
         </View>
     );
 
-    // 渲染概览指标
+    // 渲染指标卡片
     const renderMetrics = () => (
         <ScrollView
             horizontal
@@ -581,103 +566,67 @@ export default function StatisticsScreen() {
             />
             <MetricCard
                 title="最常用产品"
-                value={productDistribution[0]?.x || '-'}
+                value={productDistribution[0]?.name || '-'}
                 subtitle="使用频率最高"
-                icon="star-outline"
+                icon="package-variant"
             />
         </ScrollView>
     );
 
-    // 渲染使用趋势图表
-    const renderUsageTrendChart = () => (
+    const renderLineChart = () => (
         <Card elevation="sm" style={styles.chartCard}>
             <Typography variant="h3" style={styles.chartTitle}>
                 使用趋势
             </Typography>
-            <Animated.View style={chartStyle}>
-                <VictoryChart
-                    width={SCREEN_WIDTH - 48}
-                    height={220}
-                    padding={{ top: 20, bottom: 40, left: 40, right: 20 }}
-                >
-                    <VictoryAxis
-                        tickFormat={(t) => t}
-                        style={{
-                            axis: { stroke: theme.colors.text.disabled },
-                            ticks: { stroke: theme.colors.text.disabled },
-                            tickLabels: {
-                                fontSize: 12,
-                                fill: theme.colors.text.secondary,
-                            },
-                        }}
-                    />
-                    <VictoryAxis
-                        dependentAxis
-                        tickFormat={(t) => Math.round(t)}
-                        style={{
-                            axis: { stroke: theme.colors.text.disabled },
-                            ticks: { stroke: theme.colors.text.disabled },
-                            tickLabels: {
-                                fontSize: 12,
-                                fill: theme.colors.text.secondary,
-                            },
-                        }}
-                    />
-                    <VictoryLine
-                        data={usageData}
-                        x="date"
-                        y="count"
-                        style={{
-                            data: {
-                                stroke: theme.colors.primary.main,
-                                strokeWidth: 2,
-                            },
-                        }}
-                    />
-                    <VictoryScatter
-                        data={usageData}
-                        x="date"
-                        y="count"
-                        size={4}
-                        style={{
-                            data: {
-                                fill: theme.colors.primary.main,
-                            },
-                        }}
-                    />
-                </VictoryChart>
-            </Animated.View>
+            <LineChart
+                data={{
+                    labels: usageData.map(d => d.date),
+                    datasets: [{
+                        data: usageData.map(d => d.count)
+                    }]
+                }}
+                width={SCREEN_WIDTH - 48}
+                height={220}
+                chartConfig={{
+                    backgroundColor: theme.colors.background.paper,
+                    backgroundGradientFrom: theme.colors.background.paper,
+                    backgroundGradientTo: theme.colors.background.paper,
+                    decimalPlaces: 0,
+                    color: (opacity = 1) => theme.colors.primary.main,
+                    labelColor: (opacity = 1) => theme.colors.text.secondary,
+                    style: {
+                        borderRadius: 16
+                    },
+                    propsForDots: {
+                        r: "6",
+                        strokeWidth: "2",
+                        stroke: theme.colors.primary.main
+                    }
+                }}
+                bezier
+                style={styles.chart}
+            />
         </Card>
     );
 
-    // 渲染产品分布图表
-    const renderProductDistributionChart = () => (
+    const renderPieChart = () => (
         <Card elevation="sm" style={styles.chartCard}>
             <Typography variant="h3" style={styles.chartTitle}>
                 产品使用分布
             </Typography>
-            <View style={styles.pieChartContainer}>
-                <VictoryPie
-                    data={productDistribution}
-                    width={SCREEN_WIDTH - 48}
-                    height={220}
-                    colorScale={[
-                        theme.colors.primary.main,
-                        theme.colors.secondary.main,
-                        theme.colors.success.main,
-                        theme.colors.info.main,
-                    ]}
-                    innerRadius={70}
-                    labelRadius={90}
-                    style={{
-                        labels: {
-                            fill: theme.colors.text.primary,
-                            fontSize: 12,
-                        },
-                    }}
-                    animate={{ duration: 500 }}
-                />
-            </View>
+            <PieChart
+                data={productDistribution}
+                width={SCREEN_WIDTH - 48}
+                height={220}
+                chartConfig={{
+                    color: (opacity = 1) => theme.colors.primary.main,
+                    labelColor: (opacity = 1) => theme.colors.text.primary
+                }}
+                accessor="population"
+                backgroundColor="transparent"
+                paddingLeft="15"
+                absolute
+            />
         </Card>
     );
 
@@ -720,54 +669,6 @@ export default function StatisticsScreen() {
         </Card>
     );
 
-    // 渲染使用建议
-    const renderSuggestions = () => (
-        <Card elevation="sm" style={styles.chartCard}>
-            <Typography variant="h3" style={styles.chartTitle}>
-                健康建议
-            </Typography>
-            <View style={styles.suggestionContainer}>
-                {[
-                    {
-                        icon: 'clock-time-four',
-                        title: '更换时间',
-                        message: averageInterval > 6
-                            ? '建议缩短使用时间，保持4-6小时更换一次'
-                            : '当前更换频率适中，请继续保持',
-                        type: averageInterval > 6 ? 'warning' : 'success',
-                    },
-                    {
-                        icon: 'water',
-                        title: '使用量',
-                        message: '本月使用量正常，符合健康标准',
-                        type: 'success',
-                    },
-                ].map((item) => (
-                    <View key={item.title} style={styles.suggestionItem}>
-                        <Icon
-                            name={item.icon}
-                            size={24}
-                            color={
-                                item.type === 'warning'
-                                    ? theme.colors.warning.main
-                                    : theme.colors.success.main
-                            }
-                        />
-                        <View style={styles.suggestionContent}>
-                            <Typography variant="body1">{item.title}</Typography>
-                            <Typography
-                                variant="body2"
-                                color={theme.colors.text.secondary}
-                            >
-                                {item.message}
-                            </Typography>
-                        </View>
-                    </View>
-                ))}
-            </View>
-        </Card>
-    );
-
     return (
         <ScrollView
             style={[
@@ -777,10 +678,9 @@ export default function StatisticsScreen() {
         >
             {renderTimeRangeSelector()}
             {renderMetrics()}
-            {renderUsageTrendChart()}
-            {renderProductDistributionChart()}
+            {renderLineChart()}
+            {renderPieChart()}
             {renderDurationDistribution()}
-            {renderSuggestions()}
         </ScrollView>
     );
 }
@@ -830,10 +730,9 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         paddingHorizontal: 16,
     },
-    pieChartContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 220,
+    chart: {
+        marginVertical: 8,
+        borderRadius: 16,
     },
     durationContainer: {
         padding: 16,
@@ -855,156 +754,5 @@ const styles = StyleSheet.create({
     durationProgress: {
         height: '100%',
         borderRadius: 4,
-    },
-    suggestionContainer: {
-        padding: 16,
-    },
-    suggestionItem: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginBottom: 16,
-    },
-    suggestionContent: {
-        flex: 1,
-        marginLeft: 12,
-    },
-    legendContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        marginTop: 16,
-    },
-    legendItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginRight: 16,
-        marginBottom: 8,
-    },
-    legendColor: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        marginRight: 4,
-    },
-    tabContainer: {
-        flexDirection: 'row',
-        marginHorizontal: 16,
-        marginBottom: 16,
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-        borderRadius: 8,
-        padding: 4,
-    },
-    tabButton: {
-        flex: 1,
-        paddingVertical: 8,
-        alignItems: 'center',
-        borderRadius: 6,
-    },
-    activeTab: {
-        backgroundColor: 'white',
-    },
-    tabText: {
-        fontSize: 14,
-        fontWeight: '500',
-    },
-    noDataContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 32,
-    },
-    noDataIcon: {
-        marginBottom: 16,
-    },
-    exportButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 8,
-        borderRadius: 8,
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-        alignSelf: 'flex-end',
-        margin: 16,
-    },
-    exportIcon: {
-        marginRight: 4,
-    },
-    tooltipContainer: {
-        position: 'absolute',
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        padding: 8,
-        borderRadius: 4,
-        maxWidth: 200,
-    },
-    tooltipText: {
-        color: 'white',
-        fontSize: 12,
-    },
-    tooltipArrow: {
-        position: 'absolute',
-        bottom: -8,
-        left: '50%',
-        marginLeft: -8,
-        borderTopWidth: 8,
-        borderRightWidth: 8,
-        borderBottomWidth: 0,
-        borderLeftWidth: 8,
-        borderTopColor: 'rgba(0, 0, 0, 0.8)',
-        borderRightColor: 'transparent',
-        borderBottomColor: 'transparent',
-        borderLeftColor: 'transparent',
-    },
-    zoomControls: {
-        position: 'absolute',
-        right: 16,
-        bottom: 16,
-        flexDirection: 'row',
-        backgroundColor: 'white',
-        borderRadius: 20,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    zoomButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    zoomDivider: {
-        width: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    },
-    periodIndicator: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(255, 182, 193, 0.1)',
-    },
-    customLegend: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        marginTop: 16,
-        marginBottom: 8,
-    },
-    legendBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.05)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        marginRight: 8,
-        marginBottom: 8,
-    },
-    legendDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        marginRight: 6,
     },
 });

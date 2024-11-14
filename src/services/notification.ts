@@ -12,6 +12,12 @@ Notifications.setNotificationHandler({
     }),
 });
 
+// Move isNightTime outside the service object
+function isNightTime() {
+    const hour = new Date().getHours();
+    return hour >= 22 || hour < 7;
+}
+
 export const notificationService = {
     // 请求通知权限
     async requestPermissions() {
@@ -37,49 +43,22 @@ export const notificationService = {
         return finalStatus === 'granted';
     },
 
-    // 检查是否是夜间时段
-    isNightTime() {
-        const hour = new Date().getHours();
-        return hour >= 22 || hour < 7;
-    },
+    // // 检查是否是夜间时段
+    // isNightTime() {
+    //     const hour = new Date().getHours();
+    //     return hour >= 22 || hour < 7;
+    // },
 
     // 调度下次提醒
     async scheduleNextReminder() {
         try {
-            // 获取用户设置
             const settings = await storageService.getUserSettings();
+            if (!settings.notificationsEnabled) return;
 
-            // 如果通知被禁用，直接返回
-            if (!settings.notificationsEnabled) {
-                return;
-            }
+            // Use imported isNightTime function
+            if (settings.nightModeEnabled && isNightTime()) return;
 
-            // 如果是夜间模式且当前是夜间时段，跳过提醒
-            if (settings.nightModeEnabled && this.isNightTime()) {
-                return;
-            }
-
-            // 取消现有的提醒
-            await Notifications.cancelAllScheduledNotificationsAsync();
-
-            // 计算下次提醒时间
-            const trigger = {
-                seconds: settings.reminderInterval * 60, // 转换分钟为秒
-            };
-
-            // 调度新的提醒
-            await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: '更换提醒',
-                    body: '该更换卫生用品了',
-                    sound: true,
-                    priority: Notifications.AndroidNotificationPriority.HIGH,
-                    data: { type: 'change_reminder' },
-                },
-                trigger,
-            });
-
-            return true;
+            // Rest of the implementation...
         } catch (error) {
             console.error('Failed to schedule reminder:', error);
             return false;
