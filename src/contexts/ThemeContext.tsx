@@ -1,36 +1,36 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { ThemeType } from '../types/theme';
-import { themes } from '../themes';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { lightTheme, darkTheme } from '../themes';
+import { Theme } from '../types/theme';
 import { storageService } from '../services/storage';
 
 interface ThemeContextType {
-    theme: ThemeType;
-    setTheme: (theme: ThemeType) => Promise<void>;
+    theme: Theme;
+    toggleTheme: () => Promise<void>;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setThemeState] = useState<ThemeType>('pink');
+    const [isDarkMode, setIsDarkMode] = useState(false);
 
     useEffect(() => {
-        // 加载保存的主题设置
         const loadTheme = async () => {
             const settings = await storageService.getUserSettings();
-            if (settings.theme) {
-                setThemeState(settings.theme);
-            }
+            setIsDarkMode(settings.darkMode || false);
         };
         loadTheme();
     }, []);
 
-    const setTheme = async (newTheme: ThemeType) => {
-        setThemeState(newTheme);
-        await storageService.updateUserSettings({ theme: newTheme });
+    const toggleTheme = async () => {
+        const newDarkMode = !isDarkMode;
+        setIsDarkMode(newDarkMode);
+        await storageService.updateUserSettings({ darkMode: newDarkMode });
     };
 
+    const theme = isDarkMode ? darkTheme : lightTheme;
+
     return (
-        <ThemeContext.Provider value={{ theme, setTheme }}>
+        <ThemeContext.Provider value={{ theme, toggleTheme }}>
             {children}
         </ThemeContext.Provider>
     );

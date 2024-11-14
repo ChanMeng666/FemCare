@@ -124,200 +124,565 @@
 // });
 
 
-import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { Text, Card, Portal, Dialog, Button, IconButton, Surface, useTheme } from 'react-native-paper';
-import { useUsageRecords, useSettings } from '../hooks/useStorage';
+// import React, { useState, useCallback } from 'react';
+// import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+// import { Text, Card, Portal, Dialog, Button, IconButton, Surface, useTheme } from 'react-native-paper';
+// import { useUsageRecords, useSettings } from '../hooks/useStorage';
+// import { useNotifications } from '../hooks/useNotification';
+// import { ProductType } from '../types';
+// import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+//
+// // 获取屏幕宽度用于计算按钮大小
+// const screenWidth = Dimensions.get('window').width;
+//
+// export default function HomeScreen() {
+//     const { records, addRecord } = useUsageRecords();
+//     const { settings } = useSettings();
+//     const { scheduleReminder } = useNotifications();
+//     const [quickActionVisible, setQuickActionVisible] = useState(false);
+//     const [emergencyVisible, setEmergencyVisible] = useState(false);
+//     const theme = useTheme();
+//
+//     // 计算上次更换到现在的时间
+//     const getLastChangeInfo = () => {
+//         if (records.length === 0) return null;
+//         const lastRecord = records[records.length - 1];
+//         const timeDiff = Date.now() - lastRecord.timestamp;
+//         const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+//         const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+//
+//         // 判断是否超时
+//         const isOverdue = hours >= (settings.reminderInterval / 60);
+//
+//         return {
+//             hours,
+//             minutes,
+//             isOverdue,
+//             productType: lastRecord.productType
+//         };
+//     };
+//
+//     // 快速记录更换
+//     const handleQuickChange = async (productType: ProductType) => {
+//         const success = await addRecord({
+//             timestamp: Date.now(),
+//             productType,
+//         });
+//
+//         if (success) {
+//             await scheduleReminder();
+//             setQuickActionVisible(false);
+//         }
+//     };
+//
+//     const lastChangeInfo = getLastChangeInfo();
+//
+//     return (
+//         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+//             {/* 状态卡片 */}
+//             <Card
+//                 style={[styles.card, {
+//                     backgroundColor: theme.colors.surface,
+//                     borderColor: lastChangeInfo?.isOverdue ? theme.colors.error : theme.colors.primary,
+//                     borderWidth: 1
+//                 }]}
+//             >
+//                 <Card.Content>
+//                     <Text variant="titleLarge" style={styles.cardTitle}>
+//                         使用状态
+//                     </Text>
+//                     {lastChangeInfo ? (
+//                         <>
+//                             <Text
+//                                 variant="bodyLarge"
+//                                 style={[
+//                                     styles.timeText,
+//                                     { color: lastChangeInfo.isOverdue ? theme.colors.error : theme.colors.text }
+//                                 ]}
+//                             >
+//                                 {`已使用 ${lastChangeInfo.hours}小时 ${lastChangeInfo.minutes}分钟`}
+//                             </Text>
+//                             {lastChangeInfo.isOverdue && (
+//                                 <Text style={{ color: theme.colors.error }}>
+//                                     ⚠️ 建议尽快更换
+//                                 </Text>
+//                             )}
+//                         </>
+//                     ) : (
+//                         <Text variant="bodyMedium">暂无使用记录</Text>
+//                     )}
+//                 </Card.Content>
+//             </Card>
+//
+//             {/* 快速操作区 */}
+//             <Surface style={styles.quickActions} elevation={0}>
+//                 <TouchableOpacity
+//                     style={[styles.mainButton, { backgroundColor: theme.colors.primary }]}
+//                     onPress={() => setQuickActionVisible(true)}
+//                 >
+//                     <Icon name="plus" size={32} color="white" />
+//                     <Text style={styles.mainButtonText}>记录更换</Text>
+//                 </TouchableOpacity>
+//
+//                 <View style={styles.secondaryButtons}>
+//                     <IconButton
+//                         icon="clock-outline"
+//                         size={28}
+//                         mode="contained"
+//                         onPress={() => {/* 调整提醒时间 */}}
+//                         style={styles.secondaryButton}
+//                     />
+//                     <IconButton
+//                         icon="bell-off-outline"
+//                         size={28}
+//                         mode="contained"
+//                         onPress={() => {/* 暂停提醒 */}}
+//                         style={styles.secondaryButton}
+//                     />
+//                     <IconButton
+//                         icon="alert-octagon-outline"
+//                         size={28}
+//                         mode="contained"
+//                         onPress={() => setEmergencyVisible(true)}
+//                         style={[styles.secondaryButton, { backgroundColor: theme.colors.error }]}
+//                     />
+//                 </View>
+//             </Surface>
+//
+//             {/* 快速记录对话框 */}
+//             <Portal>
+//                 <Dialog
+//                     visible={quickActionVisible}
+//                     onDismiss={() => setQuickActionVisible(false)}
+//                     style={{ backgroundColor: theme.colors.surface }}
+//                 >
+//                     <Dialog.Title>快速记录</Dialog.Title>
+//                     <Dialog.Content>
+//                         <View style={styles.quickChangeButtons}>
+//                             <Button
+//                                 mode="contained"
+//                                 onPress={() => handleQuickChange(ProductType.PAD)}
+//                                 style={styles.productButton}
+//                             >
+//                                 卫生巾
+//                             </Button>
+//                             <Button
+//                                 mode="contained"
+//                                 onPress={() => handleQuickChange(ProductType.TAMPON)}
+//                                 style={styles.productButton}
+//                             >
+//                                 卫生棉条
+//                             </Button>
+//                             <Button
+//                                 mode="contained"
+//                                 onPress={() => handleQuickChange(ProductType.CUP)}
+//                                 style={styles.productButton}
+//                             >
+//                                 月经杯
+//                             </Button>
+//                         </View>
+//                     </Dialog.Content>
+//                 </Dialog>
+//
+//                 {/* 紧急指南对话框 */}
+//                 <Dialog
+//                     visible={emergencyVisible}
+//                     onDismiss={() => setEmergencyVisible(false)}
+//                     style={{ backgroundColor: theme.colors.surface }}
+//                 >
+//                     <Dialog.Title>异常处理指南</Dialog.Title>
+//                     <Dialog.Content>
+//                         <Text variant="bodyMedium">
+//                             1. 保持冷静,找到安全的私密空间
+//                         </Text>
+//                         <Text variant="bodyMedium">
+//                             2. 如果无法自行取出,请及时就医
+//                         </Text>
+//                         <Text variant="bodyMedium">
+//                             3. 建议记录使用时间,便于医生诊断
+//                         </Text>
+//                     </Dialog.Content>
+//                     <Dialog.Actions>
+//                         <Button
+//                             onPress={() => setEmergencyVisible(false)}
+//                             textColor={theme.colors.text}
+//                         >
+//                             关闭
+//                         </Button>
+//                         <Button
+//                             onPress={() => {/* 拨打急救电话 */}}
+//                             textColor={theme.colors.error}
+//                         >
+//                             拨打急救电话
+//                         </Button>
+//                     </Dialog.Actions>
+//                 </Dialog>
+//             </Portal>
+//         </View>
+//     );
+// }
+//
+// const styles = StyleSheet.create({
+//     container: {
+//         flex: 1,
+//         padding: 16,
+//     },
+//     card: {
+//         marginBottom: 20,
+//         borderRadius: 12,
+//     },
+//     cardTitle: {
+//         marginBottom: 8,
+//     },
+//     timeText: {
+//         fontSize: 20,
+//         fontWeight: '500',
+//         marginVertical: 8,
+//     },
+//     quickActions: {
+//         padding: 16,
+//         borderRadius: 12,
+//         alignItems: 'center',
+//     },
+//     mainButton: {
+//         width: screenWidth * 0.8,
+//         height: 100,
+//         borderRadius: 16,
+//         justifyContent: 'center',
+//         alignItems: 'center',
+//         marginBottom: 16,
+//     },
+//     mainButtonText: {
+//         color: 'white',
+//         fontSize: 18,
+//         marginTop: 8,
+//     },
+//     secondaryButtons: {
+//         flexDirection: 'row',
+//         justifyContent: 'space-around',
+//         width: '100%',
+//     },
+//     secondaryButton: {
+//         margin: 8,
+//     },
+//     quickChangeButtons: {
+//         gap: 12,
+//     },
+//     productButton: {
+//         marginVertical: 4,
+//     },
+// });
+
+
+// screens/HomeScreen.tsx
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+    View,
+    ScrollView,
+    StyleSheet,
+    Animated,
+    TouchableOpacity,
+} from 'react-native';
+import { useTheme } from '../hooks/useTheme';
+import { Card } from '../components/base/Card';
+import { Typography } from '../components/base/Typography';
+import { Button } from '../components/base/Button';
+import { IconButton } from '../components/base/IconButton';
+import { useUsageRecords } from '../hooks/useStorage';
 import { useNotifications } from '../hooks/useNotification';
 import { ProductType } from '../types';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
+import { VictoryPie, VictoryLabel } from 'victory-native';
+import { format, differenceInHours, differenceInMinutes } from 'date-fns';
 
-// 获取屏幕宽度用于计算按钮大小
-const screenWidth = Dimensions.get('window').width;
+interface TimelineItem {
+    time: string;
+    type: ProductType;
+    duration: string;
+}
+
+const ProductIcons: Record<ProductType, string> = {
+    [ProductType.PAD]: 'bandage',
+    [ProductType.TAMPON]: 'water',
+    [ProductType.CUP]: 'cup',
+    [ProductType.DISC]: 'disc',
+};
+
+const ProductNames: Record<ProductType, string> = {
+    [ProductType.PAD]: '卫生巾',
+    [ProductType.TAMPON]: '卫生棉条',
+    [ProductType.CUP]: '月经杯',
+    [ProductType.DISC]: '月经碟',
+};
 
 export default function HomeScreen() {
+    const theme = useTheme();
     const { records, addRecord } = useUsageRecords();
-    const { settings } = useSettings();
     const { scheduleReminder } = useNotifications();
     const [quickActionVisible, setQuickActionVisible] = useState(false);
-    const [emergencyVisible, setEmergencyVisible] = useState(false);
-    const theme = useTheme();
+    const [selectedProduct, setSelectedProduct] = useState<ProductType>(ProductType.PAD);
 
-    // 计算上次更换到现在的时间
-    const getLastChangeInfo = () => {
+    // 动画值
+    const fadeAnim = React.useRef(new Animated.Value(0)).current;
+    const slideAnim = React.useRef(new Animated.Value(100)).current;
+
+    // 获取最近的使用记录
+    const getLastUsageInfo = () => {
         if (records.length === 0) return null;
-        const lastRecord = records[records.length - 1];
-        const timeDiff = Date.now() - lastRecord.timestamp;
-        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
 
-        // 判断是否超时
-        const isOverdue = hours >= (settings.reminderInterval / 60);
+        const lastRecord = records[records.length - 1];
+        const now = new Date();
+        const lastTime = new Date(lastRecord.timestamp);
+
+        const hours = differenceInHours(now, lastTime);
+        const minutes = differenceInMinutes(now, lastTime) % 60;
+
+        const isOverdue = hours >= 6;
 
         return {
             hours,
             minutes,
             isOverdue,
-            productType: lastRecord.productType
+            type: lastRecord.productType,
         };
     };
 
-    // 快速记录更换
-    const handleQuickChange = async (productType: ProductType) => {
+    // 生成时间轴数据
+    const getTimelineData = useCallback((): TimelineItem[] => {
+        return records.slice(-5).map(record => {
+            const date = new Date(record.timestamp);
+            const now = new Date();
+            const hours = differenceInHours(now, date);
+            const minutes = differenceInMinutes(now, date) % 60;
+
+            return {
+                time: format(date, 'HH:mm'),
+                type: record.productType,
+                duration: `${hours}小时${minutes}分钟前`,
+            };
+        }).reverse();
+    }, [records]);
+
+    // 处理快速记录
+    const handleQuickRecord = async (type: ProductType) => {
         const success = await addRecord({
             timestamp: Date.now(),
-            productType,
+            productType: type,
         });
 
         if (success) {
             await scheduleReminder();
             setQuickActionVisible(false);
+            showSuccessAnimation();
         }
     };
 
-    const lastChangeInfo = getLastChangeInfo();
+    // 显示成功动画
+    const showSuccessAnimation = () => {
+        fadeAnim.setValue(0);
+        slideAnim.setValue(100);
+
+        Animated.parallel([
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+            Animated.timing(slideAnim, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: true,
+            }),
+        ]).start(() => {
+            setTimeout(() => {
+                Animated.parallel([
+                    Animated.timing(fadeAnim, {
+                        toValue: 0,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(slideAnim, {
+                        toValue: 100,
+                        duration: 300,
+                        useNativeDriver: true,
+                    }),
+                ]).start();
+            }, 2000);
+        });
+    };
+
+    // 渲染状态卡片
+    const renderStatusCard = () => {
+        const lastUsage = getLastUsageInfo();
+
+        return (
+            <Card
+                elevation="md"
+                style={[
+                    styles.card,
+                    lastUsage?.isOverdue && styles.overdueCard,
+                ]}
+            >
+                <View style={styles.cardHeader}>
+                    <Typography variant="h2">使用状态</Typography>
+                    <IconButton
+                        onPress={() => setQuickActionVisible(true)}
+                        size="large"
+                        color={theme.colors.primary.main}
+                    >
+                        <Icon
+                            name="plus"
+                            size={24}
+                            color={theme.colors.primary.main}
+                        />
+                    </IconButton>
+                </View>
+
+                {lastUsage ? (
+                    <>
+                        <View style={styles.statusInfo}>
+                            <Icon
+                                name={ProductIcons[lastUsage.type]}
+                                size={32}
+                                color={lastUsage.isOverdue ? theme.colors.error.main : theme.colors.primary.main}
+                            />
+                            <View style={styles.statusText}>
+                                <Typography variant="h3">
+                                    {`${lastUsage.hours}小时 ${lastUsage.minutes}分钟`}
+                                </Typography>
+                                <Typography variant="body2" color={theme.colors.text.secondary}>
+                                    已使用 {ProductNames[lastUsage.type]}
+                                </Typography>
+                            </View>
+                        </View>
+
+                        {lastUsage.isOverdue && (
+                            <Typography
+                                variant="body2"
+                                color={theme.colors.error.main}
+                                style={styles.warningText}
+                            >
+                                ⚠️ 建议尽快更换，避免健康风险
+                            </Typography>
+                        )}
+                    </>
+                ) : (
+                    <Typography variant="body1" style={styles.emptyText}>
+                        暂无使用记录
+                    </Typography>
+                )}
+            </Card>
+        );
+    };
+
+    // 渲染时间轴
+    const renderTimeline = () => {
+        const timelineData = getTimelineData();
+
+        return (
+            <Card elevation="sm" style={styles.card}>
+                <Typography variant="h3" style={styles.timelineTitle}>
+                    最近记录
+                </Typography>
+
+                {timelineData.map((item, index) => (
+                    <View key={index} style={styles.timelineItem}>
+                        <View style={styles.timelineDot} />
+                        <View style={styles.timelineContent}>
+                            <Typography variant="body1">
+                                {ProductNames[item.type]}
+                            </Typography>
+                            <Typography variant="caption" color={theme.colors.text.secondary}>
+                                {item.time} ({item.duration})
+                            </Typography>
+                        </View>
+                    </View>
+                ))}
+            </Card>
+        );
+    };
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            {/* 状态卡片 */}
-            <Card
-                style={[styles.card, {
-                    backgroundColor: theme.colors.surface,
-                    borderColor: lastChangeInfo?.isOverdue ? theme.colors.error : theme.colors.primary,
-                    borderWidth: 1
-                }]}
-            >
-                <Card.Content>
-                    <Text variant="titleLarge" style={styles.cardTitle}>
-                        使用状态
-                    </Text>
-                    {lastChangeInfo ? (
-                        <>
-                            <Text
-                                variant="bodyLarge"
-                                style={[
-                                    styles.timeText,
-                                    { color: lastChangeInfo.isOverdue ? theme.colors.error : theme.colors.text }
-                                ]}
-                            >
-                                {`已使用 ${lastChangeInfo.hours}小时 ${lastChangeInfo.minutes}分钟`}
-                            </Text>
-                            {lastChangeInfo.isOverdue && (
-                                <Text style={{ color: theme.colors.error }}>
-                                    ⚠️ 建议尽快更换
-                                </Text>
-                            )}
-                        </>
-                    ) : (
-                        <Text variant="bodyMedium">暂无使用记录</Text>
-                    )}
-                </Card.Content>
-            </Card>
+        <View style={[styles.container, { backgroundColor: theme.colors.background.default }]}>
+            <ScrollView style={styles.scrollView}>
+                {renderStatusCard()}
+                {renderTimeline()}
 
-            {/* 快速操作区 */}
-            <Surface style={styles.quickActions} elevation={0}>
-                <TouchableOpacity
-                    style={[styles.mainButton, { backgroundColor: theme.colors.primary }]}
-                    onPress={() => setQuickActionVisible(true)}
-                >
-                    <Icon name="plus" size={32} color="white" />
-                    <Text style={styles.mainButtonText}>记录更换</Text>
-                </TouchableOpacity>
+                {/* 统计卡片可以在这里添加 */}
+            </ScrollView>
 
-                <View style={styles.secondaryButtons}>
-                    <IconButton
-                        icon="clock-outline"
-                        size={28}
-                        mode="contained"
-                        onPress={() => {/* 调整提醒时间 */}}
-                        style={styles.secondaryButton}
+            {/* 快速操作面板 */}
+            {quickActionVisible && (
+                <View style={styles.quickActionOverlay}>
+                    <TouchableOpacity
+                        style={styles.overlayBackdrop}
+                        onPress={() => setQuickActionVisible(false)}
                     />
-                    <IconButton
-                        icon="bell-off-outline"
-                        size={28}
-                        mode="contained"
-                        onPress={() => {/* 暂停提醒 */}}
-                        style={styles.secondaryButton}
-                    />
-                    <IconButton
-                        icon="alert-octagon-outline"
-                        size={28}
-                        mode="contained"
-                        onPress={() => setEmergencyVisible(true)}
-                        style={[styles.secondaryButton, { backgroundColor: theme.colors.error }]}
-                    />
-                </View>
-            </Surface>
+                    <Card
+                        elevation="lg"
+                        style={styles.quickActionPanel}
+                    >
+                        <Typography variant="h2" style={styles.quickActionTitle}>
+                            记录更换
+                        </Typography>
 
-            {/* 快速记录对话框 */}
-            <Portal>
-                <Dialog
-                    visible={quickActionVisible}
-                    onDismiss={() => setQuickActionVisible(false)}
-                    style={{ backgroundColor: theme.colors.surface }}
-                >
-                    <Dialog.Title>快速记录</Dialog.Title>
-                    <Dialog.Content>
-                        <View style={styles.quickChangeButtons}>
-                            <Button
-                                mode="contained"
-                                onPress={() => handleQuickChange(ProductType.PAD)}
-                                style={styles.productButton}
-                            >
-                                卫生巾
-                            </Button>
-                            <Button
-                                mode="contained"
-                                onPress={() => handleQuickChange(ProductType.TAMPON)}
-                                style={styles.productButton}
-                            >
-                                卫生棉条
-                            </Button>
-                            <Button
-                                mode="contained"
-                                onPress={() => handleQuickChange(ProductType.CUP)}
-                                style={styles.productButton}
-                            >
-                                月经杯
-                            </Button>
+                        <View style={styles.productGrid}>
+                            {Object.entries(ProductType).map(([key, type]) => (
+                                <TouchableOpacity
+                                    key={key}
+                                    style={[
+                                        styles.productItem,
+                                        selectedProduct === type && styles.selectedProduct,
+                                    ]}
+                                    onPress={() => handleQuickRecord(type)}
+                                >
+                                    <Icon
+                                        name={ProductIcons[type]}
+                                        size={32}
+                                        color={
+                                            selectedProduct === type
+                                                ? theme.colors.primary.contrast
+                                                : theme.colors.primary.main
+                                        }
+                                    />
+                                    <Typography
+                                        variant="caption"
+                                        color={
+                                            selectedProduct === type
+                                                ? theme.colors.primary.contrast
+                                                : theme.colors.text.primary
+                                        }
+                                        style={styles.productName}
+                                    >
+                                        {ProductNames[type]}
+                                    </Typography>
+                                </TouchableOpacity>
+                            ))}
                         </View>
-                    </Dialog.Content>
-                </Dialog>
+                    </Card>
+                </View>
+            )}
 
-                {/* 紧急指南对话框 */}
-                <Dialog
-                    visible={emergencyVisible}
-                    onDismiss={() => setEmergencyVisible(false)}
-                    style={{ backgroundColor: theme.colors.surface }}
+            {/* 成功提示动画 */}
+            <Animated.View
+                style={[
+                    styles.successToast,
+                    {
+                        opacity: fadeAnim,
+                        transform: [{ translateY: slideAnim }],
+                        backgroundColor: theme.colors.success.main,
+                    },
+                ]}
+            >
+                <Icon name="check-circle" size={24} color="white" />
+                <Typography
+                    variant="body2"
+                    color="white"
+                    style={styles.successText}
                 >
-                    <Dialog.Title>异常处理指南</Dialog.Title>
-                    <Dialog.Content>
-                        <Text variant="bodyMedium">
-                            1. 保持冷静,找到安全的私密空间
-                        </Text>
-                        <Text variant="bodyMedium">
-                            2. 如果无法自行取出,请及时就医
-                        </Text>
-                        <Text variant="bodyMedium">
-                            3. 建议记录使用时间,便于医生诊断
-                        </Text>
-                    </Dialog.Content>
-                    <Dialog.Actions>
-                        <Button
-                            onPress={() => setEmergencyVisible(false)}
-                            textColor={theme.colors.text}
-                        >
-                            关闭
-                        </Button>
-                        <Button
-                            onPress={() => {/* 拨打急救电话 */}}
-                            textColor={theme.colors.error}
-                        >
-                            拨打急救电话
-                        </Button>
-                    </Dialog.Actions>
-                </Dialog>
-            </Portal>
+                    记录已保存
+                </Typography>
+            </Animated.View>
         </View>
     );
 }
@@ -325,50 +690,109 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    scrollView: {
+        flex: 1,
         padding: 16,
     },
     card: {
-        marginBottom: 20,
-        borderRadius: 12,
+        marginBottom: 16,
     },
-    cardTitle: {
-        marginBottom: 8,
+    overdueCard: {
+        borderWidth: 1,
+        borderColor: 'red',
     },
-    timeText: {
-        fontSize: 20,
-        fontWeight: '500',
-        marginVertical: 8,
-    },
-    quickActions: {
-        padding: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    mainButton: {
-        width: screenWidth * 0.8,
-        height: 100,
-        borderRadius: 16,
-        justifyContent: 'center',
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
     },
-    mainButtonText: {
-        color: 'white',
-        fontSize: 18,
+    statusInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginTop: 8,
     },
-    secondaryButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
+    statusText: {
+        marginLeft: 16,
     },
-    secondaryButton: {
+    warningText: {
+        marginTop: 12,
+    },
+    emptyText: {
+        textAlign: 'center',
+        marginTop: 16,
+    },
+    timelineTitle: {
+        marginBottom: 16,
+    },
+    timelineItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    timelineDot: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#FF69B4',
+        marginRight: 12,
+    },
+    timelineContent: {
+        flex: 1,
+    },
+    quickActionOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        justifyContent: 'flex-end',
+    },
+    overlayBackdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    quickActionPanel: {
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        padding: 24,
+    },
+    quickActionTitle: {
+        marginBottom: 24,
+        textAlign: 'center',
+    },
+    productGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginHorizontal: -8,
+    },
+    productItem: {
+        width: '45%',
+        aspectRatio: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F5F5F7',
+        borderRadius: 12,
         margin: 8,
     },
-    quickChangeButtons: {
-        gap: 12,
+    selectedProduct: {
+        backgroundColor: '#FF69B4',
     },
-    productButton: {
-        marginVertical: 4,
+    productName: {
+        marginTop: 8,
+        textAlign: 'center',
+    },
+    successToast: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        right: 20,
+        backgroundColor: '#4CAF50',
+        borderRadius: 8,
+        padding: 16,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    successText: {
+        marginLeft: 8,
     },
 });

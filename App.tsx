@@ -17,13 +17,15 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import AppNavigator from './src/navigation/AppNavigator';
 import { ThemeProvider } from './src/contexts/ThemeContext';
 import { useThemeContext } from './src/contexts/ThemeContext';
-import { themes } from './src/themes';
+import { lightTheme, darkTheme } from './src/themes'; // Fix import
 
 function Main() {
     const { theme } = useThemeContext();
+    // Use correct theme object based on mode
+    const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
     return (
-        <PaperProvider theme={themes[theme]}>
+        <PaperProvider theme={currentTheme}>
             <AppNavigator />
         </PaperProvider>
     );
