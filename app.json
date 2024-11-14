@@ -4,10 +4,10 @@
     "slug": "FemCare",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/app-icon-192.png",
+    "icon": "./src/assets/app-icon-1024.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./src/assets/app-icon-192.png",
+      "image": "./src/assets/app-icon-1024.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,7 +16,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/app-icon-192.png",
+        "foregroundImage": "./src/assets/app-icon-1024.png",
         "backgroundColor": "#ffffff"
       }
     },
