@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, Card, FAB, Portal, Dialog, Button, RadioButton } from 'react-native-paper';
+import { Text, Card, FAB, Portal, Dialog, Button, RadioButton, Snackbar } from 'react-native-paper';
 import { useUsageRecords, useSettings } from '../hooks/useStorage';
+import { useNotifications } from '../hooks/useNotification';
 import { ProductType } from '../types';
 
 export default function HomeScreen() {
@@ -10,11 +11,21 @@ export default function HomeScreen() {
     const [dialogVisible, setDialogVisible] = useState(false);
     const [selectedType, setSelectedType] = useState<ProductType>(ProductType.PAD);
 
+    const { scheduleReminder } = useNotifications();
+    const [snackbarVisible, setSnackbarVisible] = useState(false);
+
     const handleAddRecord = async () => {
-        await addRecord({
+        const success = await addRecord({
             timestamp: Date.now(),
             productType: selectedType,
         });
+
+        if (success) {
+            // 记录成功后，调度下一次提醒
+            await scheduleReminder();
+            setSnackbarVisible(true);
+        }
+
         setDialogVisible(false);
     };
 
@@ -66,6 +77,17 @@ export default function HomeScreen() {
                     </Dialog.Actions>
                 </Dialog>
             </Portal>
+
+            <Snackbar
+                visible={snackbarVisible}
+                onDismiss={() => setSnackbarVisible(false)}
+                duration={3000}
+                action={{
+                    label: '关闭',
+                    onPress: () => setSnackbarVisible(false),
+                }}>
+                已设置下次更换提醒
+            </Snackbar>
         </View>
     );
 }
