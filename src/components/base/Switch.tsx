@@ -1,36 +1,3 @@
-// import React from 'react';
-// import { Switch as RNSwitch, Platform, SwitchProps as RNSwitchProps } from 'react-native';
-// import { useTheme } from '../../hooks/useTheme';
-// import { createSwitchStyles, SwitchSize } from './styles/Switch.styles';
-//
-// interface SwitchProps extends Omit<RNSwitchProps, 'trackColor' | 'thumbColor'> {
-//     size?: SwitchSize;
-// }
-//
-// export const Switch: React.FC<SwitchProps> = ({
-//                                                   size = 'medium',
-//                                                   value = false,
-//                                                   disabled = false,
-//                                                   style,
-//                                                   ...props
-//                                               }) => {
-//     const theme = useTheme();
-//     const styles = createSwitchStyles(theme, { size, disabled, value });
-//
-//     return (
-//         <RNSwitch
-//             value={value}
-//             disabled={disabled}
-//             trackColor={styles.colors.track}
-//             thumbColor={styles.colors.thumb}
-//             ios_backgroundColor={styles.colors.ios_backgroundColor}
-//             style={[styles.switch, style]}
-//             {...props}
-//         />
-//     );
-// };
-
-
 import React from 'react';
 import { Switch as RNSwitch, Platform, SwitchProps } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';

@@ -1,4 +1,6 @@
-export type ThemeMode = 'light' | 'dark' | 'pink';
+import {ViewStyle} from "react-native";
+
+export type ThemeMode = 'light' | 'pink';
 
 export interface ColorPalette {
     // Primary colors
@@ -123,6 +125,40 @@ export interface Shadow {
     lg: string;
 }
 
+// 添加组件特定的类型
+export interface ComponentStyles {
+    Button: {
+        base: ViewStyle;
+        sizes: {
+            small: ViewStyle;
+            medium: ViewStyle;
+            large: ViewStyle;
+        };
+        variants: {
+            contained: ViewStyle;
+            outlined: ViewStyle;
+            text: ViewStyle;
+        };
+    };
+    Card: {
+        base: ViewStyle;
+        variants: {
+            elevated: ViewStyle;
+            outlined: ViewStyle;
+        };
+    };
+    Input: {
+        base: ViewStyle;
+        states: {
+            focused: ViewStyle;
+            error: ViewStyle;
+            disabled: ViewStyle;
+        };
+    };
+    // ... 可以继续添加其他组件的样式类型
+}
+
+
 export interface Theme {
     mode: ThemeMode;
     colors: ColorPalette;
@@ -130,4 +166,5 @@ export interface Theme {
     spacing: Spacing;
     borderRadius: BorderRadius;
     shadows: Shadow;
+    components: ComponentStyles;
 }

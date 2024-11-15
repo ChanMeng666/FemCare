@@ -1,5 +1,3 @@
-import { ThemeType } from './theme';
-
 // 卫生用品类型
 export enum ProductType {
     PAD = 'pad',
@@ -14,24 +12,6 @@ export interface UsageRecord {
     timestamp: number;
     productType: ProductType;
     note?: string;
-}
-
-// 月经周期记录
-export interface CycleRecord {
-    id: string;
-    startDate: number;
-    endDate?: number;
-    symptoms?: string[];
-    notes?: string;
-}
-
-// 用户设置
-export interface UserSettings {
-    defaultProductType: ProductType;
-    reminderInterval: number; // 分钟
-    nightModeEnabled: boolean;
-    notificationsEnabled: boolean;
-    theme?: ThemeType; // 主题设置
 }
 
 // 症状类型
@@ -66,13 +46,23 @@ export interface DiaryEntry {
     notes?: string;
 }
 
-// 扩展周期记录
+// 周期记录 (合并之前的两个接口)
 export interface CycleRecord {
     id: string;
     startDate: number;
     endDate?: number;
     diaryEntries: DiaryEntry[];
     predictedNextDate?: number;
+    symptoms?: string[];
+    notes?: string;
+}
+
+// 用户设置 (移除theme字段)
+export interface UserSettings {
+    defaultProductType: ProductType;
+    reminderInterval: number; // 分钟
+    nightModeEnabled: boolean;
+    notificationsEnabled: boolean;
 }
 
 // 统计数据
