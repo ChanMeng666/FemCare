@@ -1,10 +1,79 @@
+// import React from 'react';
+// import {
+//     TouchableOpacity,
+//     Text,
+//     ActivityIndicator,
+//     TouchableOpacityProps,
+//     View,
+// } from 'react-native';
+// import { useTheme } from '../../hooks/useTheme';
+// import {
+//     createButtonStyles,
+//     ButtonSize,
+//     ButtonVariant,
+// } from './styles/Button.styles';
+//
+// interface ButtonProps extends TouchableOpacityProps {
+//     variant?: ButtonVariant;
+//     size?: ButtonSize;
+//     loading?: boolean;
+//     disabled?: boolean;
+//     fullWidth?: boolean;
+//     startIcon?: React.ReactNode;
+//     endIcon?: React.ReactNode;
+//     children: React.ReactNode;
+// }
+//
+// export const Button: React.FC<ButtonProps> = ({
+//                                                   children,
+//                                                   variant = 'contained',
+//                                                   size = 'medium',
+//                                                   loading = false,
+//                                                   disabled = false,
+//                                                   fullWidth = false,
+//                                                   startIcon,
+//                                                   endIcon,
+//                                                   style,
+//                                                   ...props
+//                                               }) => {
+//     const theme = useTheme();
+//     const styles = createButtonStyles(theme, {
+//         variant,
+//         size,
+//         disabled: disabled || loading,
+//         fullWidth,
+//     });
+//
+//     return (
+//         <TouchableOpacity
+//             style={[styles.button, style]}
+//             disabled={disabled || loading}
+//             {...props}
+//         >
+//             {loading ? (
+//                 <ActivityIndicator
+//                     color={styles.loadingIndicator.color}
+//                     size={size === 'small' ? 'small' : 'large'}
+//                 />
+//             ) : (
+//                 <>
+//                     {startIcon && <View style={styles.icon}>{startIcon}</View>}
+//                     <Text style={styles.text}>{children}</Text>
+//                     {endIcon && <View style={[styles.icon, { marginLeft: 8, marginRight: 0 }]}>{endIcon}</View>}
+//                 </>
+//             )}
+//         </TouchableOpacity>
+//     );
+// };
+
+
 import React from 'react';
 import {
     TouchableOpacity,
     Text,
-    StyleSheet,
+    ActivityIndicator,
     TouchableOpacityProps,
-    ActivityIndicator, View,
+    View,
 } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -14,106 +83,49 @@ interface ButtonProps extends TouchableOpacityProps {
     loading?: boolean;
     startIcon?: React.ReactNode;
     endIcon?: React.ReactNode;
+    children: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
                                                   children,
                                                   variant = 'contained',
                                                   size = 'medium',
-                                                  loading,
-                                                  disabled,
+                                                  loading = false,
+                                                  disabled = false,
                                                   startIcon,
                                                   endIcon,
                                                   style,
                                                   ...props
                                               }) => {
     const theme = useTheme();
-
-    const getBackgroundColor = () => {
-        if (disabled) return theme.colors.text.disabled;
-        if (variant === 'contained') return theme.colors.primary.main;
-        return 'transparent';
-    };
-
-    const getTextColor = () => {
-        if (disabled) return theme.colors.background.paper;
-        if (variant === 'contained') return theme.colors.primary.contrast;
-        return theme.colors.primary.main;
-    };
-
-    const getPadding = () => {
-        switch (size) {
-            case 'small': return 8;
-            case 'large': return 16;
-            default: return 12;
-        }
-    };
+    const { base, sizes, variants } = theme.components.Button;
 
     return (
         <TouchableOpacity
             style={[
-                styles.button,
-                {
-                    backgroundColor: getBackgroundColor(),
-                    padding: getPadding(),
-                    borderRadius: theme.borderRadius.md,
-                    ...(variant === 'outlined' && {
-                        borderWidth: 1,
-                        borderColor: disabled
-                            ? theme.colors.text.disabled
-                            : theme.colors.primary.main,
-                    }),
-                },
+                base,
+                sizes[size],
+                variants[variant],
+                disabled && { opacity: 0.6 },
                 style,
             ]}
             disabled={disabled || loading}
             {...props}
         >
-            {startIcon && !loading && (
-                <View style={styles.iconStart}>{startIcon}</View>
-            )}
-
             {loading ? (
                 <ActivityIndicator
-                    color={getTextColor()}
+                    color={variants[variant].color}
                     size={size === 'small' ? 'small' : 'large'}
                 />
             ) : (
-                <Text
-                    style={[
-                        styles.text,
-                        {
-                            color: getTextColor(),
-                            fontSize: size === 'small' ? 14 : size === 'large' ? 18 : 16,
-                            fontWeight: '500',
-                        },
-                    ]}
-                >
-                    {children}
-                </Text>
-            )}
-
-            {endIcon && !loading && (
-                <View style={styles.iconEnd}>{endIcon}</View>
+                <>
+                    {startIcon && <View style={{ marginRight: theme.spacing.xs }}>{startIcon}</View>}
+                    <Text style={{ color: variants[variant].color }}>
+                        {children}
+                    </Text>
+                    {endIcon && <View style={{ marginLeft: theme.spacing.xs }}>{endIcon}</View>}
+                </>
             )}
         </TouchableOpacity>
     );
 };
-
-const styles = StyleSheet.create({
-    button: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: 64,
-    },
-    text: {
-        textAlign: 'center',
-    },
-    iconStart: {
-        marginRight: 8,
-    },
-    iconEnd: {
-        marginLeft: 8,
-    },
-});

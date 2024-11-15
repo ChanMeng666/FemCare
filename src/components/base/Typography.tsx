@@ -1,10 +1,42 @@
+// import React from 'react';
+// import { Text, TextProps } from 'react-native';
+// import { useTheme } from '../../hooks/useTheme';
+// import { createTypographyStyles, TypographyVariant } from './styles/Typography.styles';
+//
+// interface TypographyProps extends TextProps {
+//     variant?: TypographyVariant;
+//     color?: string;
+//     children: React.ReactNode;
+// }
+//
+// export const Typography: React.FC<TypographyProps> = ({
+//                                                           variant = 'body1',
+//                                                           color,
+//                                                           style,
+//                                                           children,
+//                                                           ...props
+//                                                       }) => {
+//     const theme = useTheme();
+//     const styles = createTypographyStyles(theme, variant, color);
+//
+//     return (
+//         <Text style={[styles, style]} {...props}>
+//             {children}
+//         </Text>
+//     );
+// };
+
+
 import React from 'react';
-import { Text, TextProps, StyleSheet } from 'react-native';
+import { Text, TextProps } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 
+type TypographyVariant = 'h1' | 'h2' | 'h3' | 'body1' | 'body2' | 'button' | 'caption';
+
 interface TypographyProps extends TextProps {
-    variant?: 'h1' | 'h2' | 'h3' | 'body1' | 'body2' | 'button' | 'caption';
+    variant?: TypographyVariant;
     color?: string;
+    children: React.ReactNode;
 }
 
 export const Typography: React.FC<TypographyProps> = ({
@@ -19,10 +51,8 @@ export const Typography: React.FC<TypographyProps> = ({
     return (
         <Text
             style={[
-                {
-                    ...theme.typography[variant],
-                    color: color || theme.colors.text.primary,
-                },
+                theme.typography.variants[variant],
+                { color: color || theme.colors.text.primary },
                 style,
             ]}
             {...props}

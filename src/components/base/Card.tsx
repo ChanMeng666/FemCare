@@ -1,5 +1,37 @@
+// import React from 'react';
+// import { View, ViewProps } from 'react-native';
+// import { useTheme } from '../../hooks/useTheme';
+// import {
+//     createCardStyles,
+//     CardElevation,
+//     CardVariant,
+// } from './styles/Card.styles';
+//
+// interface CardProps extends ViewProps {
+//     elevation?: CardElevation;
+//     variant?: CardVariant;
+// }
+//
+// export const Card: React.FC<CardProps> = ({
+//                                               children,
+//                                               elevation = 'sm',
+//                                               variant = 'filled',
+//                                               style,
+//                                               ...props
+//                                           }) => {
+//     const theme = useTheme();
+//     const styles = createCardStyles(theme, { elevation, variant });
+//
+//     return (
+//         <View style={[styles.card, style]} {...props}>
+//             {children}
+//         </View>
+//     );
+// };
+
+
 import React from 'react';
-import { View, StyleSheet, ViewProps } from 'react-native';
+import { View, ViewProps } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
 
 interface CardProps extends ViewProps {
@@ -15,26 +47,14 @@ export const Card: React.FC<CardProps> = ({
                                               ...props
                                           }) => {
     const theme = useTheme();
+    const { base, variants } = theme.components.Card;
 
     return (
         <View
             style={[
-                styles.card,
-                {
-                    backgroundColor: theme.colors.background.paper,
-                    borderRadius: theme.borderRadius.lg,
-                    ...(elevation !== 'none' && {
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 8,
-                        elevation: elevation === 'sm' ? 2 : elevation === 'md' ? 4 : 8,
-                    }),
-                    ...(variant === 'outlined' && {
-                        borderWidth: 1,
-                        borderColor: theme.colors.divider,
-                    }),
-                },
+                base,
+                variant === 'outlined' && variants.outlined,
+                elevation !== 'none' && theme.shadows[elevation],
                 style,
             ]}
             {...props}
@@ -43,10 +63,3 @@ export const Card: React.FC<CardProps> = ({
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    card: {
-        padding: 16,
-        margin: 8,
-    },
-});

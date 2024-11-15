@@ -1,7 +1,53 @@
+// import React from 'react';
+// import {
+//     TouchableOpacity,
+//     TouchableOpacityProps,
+//     Platform,
+// } from 'react-native';
+// import { useTheme } from '../../hooks/useTheme';
+// import {
+//     createIconButtonStyles,
+//     IconButtonSize,
+// } from './styles/IconButton.styles';
+//
+// interface IconButtonProps extends TouchableOpacityProps {
+//     size?: IconButtonSize;
+//     color?: string;
+//     disabled?: boolean;
+//     children: React.ReactNode;
+// }
+//
+// export const IconButton: React.FC<IconButtonProps> = ({
+//                                                           children,
+//                                                           size = 'medium',
+//                                                           color,
+//                                                           disabled = false,
+//                                                           style,
+//                                                           ...props
+//                                                       }) => {
+//     const theme = useTheme();
+//     const styles = createIconButtonStyles(theme, {
+//         size,
+//         color,
+//         disabled,
+//     });
+//
+//     return (
+//         <TouchableOpacity
+//             style={[styles.button, style]}
+//             disabled={disabled}
+//             activeOpacity={0.7}
+//             {...props}
+//         >
+//             {children}
+//         </TouchableOpacity>
+//     );
+// };
+
+
 import React from 'react';
 import {
     TouchableOpacity,
-    StyleSheet,
     TouchableOpacityProps,
 } from 'react-native';
 import { useTheme } from '../../hooks/useTheme';
@@ -20,7 +66,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
                                                       }) => {
     const theme = useTheme();
 
-    const getSize = () => {
+    const getSize = (): number => {
         switch (size) {
             case 'small': return 32;
             case 'large': return 48;
@@ -28,30 +74,23 @@ export const IconButton: React.FC<IconButtonProps> = ({
         }
     };
 
+    const baseStyle = {
+        width: getSize(),
+        height: getSize(),
+        borderRadius: getSize() / 2,
+        backgroundColor: color
+            ? `${color}20`
+            : `${theme.colors.primary.main}20`,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+    };
+
     return (
         <TouchableOpacity
-            style={[
-                styles.button,
-                {
-                    width: getSize(),
-                    height: getSize(),
-                    borderRadius: getSize() / 2,
-                    backgroundColor: color
-                        ? `${color}20`
-                        : `${theme.colors.primary.main}20`,
-                },
-                style,
-            ]}
+            style={[baseStyle, style]}
             {...props}
         >
             {children}
         </TouchableOpacity>
     );
 };
-
-const styles = StyleSheet.create({
-    button: {
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});

@@ -1,11 +1,11 @@
+// 导出主题钩子
 import { useContext } from 'react';
-import { Theme } from '../types/theme';
 import { ThemeContext } from '../contexts/ThemeContext';
 
-export function useTheme(): Theme {
-    const context = useContext(ThemeContext);
-    if (context === undefined) {
+export const useTheme = () => {
+    const theme = useContext(ThemeContext);
+    if (!theme) {
         throw new Error('useTheme must be used within a ThemeProvider');
     }
-    return context.theme;
-}
+    return theme;
+};
