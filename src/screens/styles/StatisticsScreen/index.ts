@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import type { Theme } from '../../../styles/theme';
 import type { StylesProps } from '../';
+import { flexMixins, spacingMixins } from '../../../styles/mixins';
 
 export const createStatisticsStyles = (theme: Theme) => StyleSheet.create({
     // 时间范围选择器

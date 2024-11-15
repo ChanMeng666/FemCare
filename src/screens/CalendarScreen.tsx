@@ -11,7 +11,7 @@ import { Card } from '../components/base/Card';
 import { Button } from '../components/base/Button';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { createCalendarStyles } from './styles';
-import { createLayoutStyles, createCardStyles } from './styles/common';
+import { createLayoutStyles, createCardStyles } from './styles';
 
 export default function CalendarScreen() {
     const theme = useTheme();

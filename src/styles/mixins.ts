@@ -98,6 +98,11 @@ export const spacingMixins = {
         paddingVertical: spacing[size],
     }),
 
+    paddingTop: (size: keyof typeof spacing) => ({
+        paddingTop: spacing[size],
+    }),
+
+
     // 外边距
     margin: (size: keyof typeof spacing) => ({
         margin: spacing[size],
@@ -109,6 +114,22 @@ export const spacingMixins = {
 
     marginY: (size: keyof typeof spacing) => ({
         marginVertical: spacing[size],
+    }),
+
+    marginTop: (size: keyof typeof spacing) => ({
+        marginTop: spacing[size],
+    }),
+
+    marginBottom: (size: keyof typeof spacing) => ({
+        marginBottom: spacing[size],
+    }),
+
+    marginLeft: (size: keyof typeof spacing) => ({
+        marginLeft: spacing[size],
+    }),
+
+    marginRight: (size: keyof typeof spacing) => ({
+        marginRight: spacing[size],
     }),
 
     // 间隙

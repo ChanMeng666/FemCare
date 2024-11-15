@@ -24,6 +24,12 @@ export const createHomeStyles = (theme: Theme) => StyleSheet.create({
         color: theme.colors.error.main,
     },
 
+    emptyText: {
+        textAlign: 'center',
+        ...spacingMixins.marginY('lg'),
+        color: theme.colors.text.secondary,
+    },
+
     // 快速操作面板
     quickActionOverlay: {
         ...StyleSheet.absoluteFillObject,
@@ -31,11 +37,34 @@ export const createHomeStyles = (theme: Theme) => StyleSheet.create({
         justifyContent: 'flex-end',
     },
 
+    overlayBackdrop: {
+        ...StyleSheet.absoluteFillObject,
+    },
+
     quickActionPanel: {
         backgroundColor: theme.colors.background.paper,
         borderTopLeftRadius: theme.borders.radius.xl,
         borderTopRightRadius: theme.borders.radius.xl,
         ...spacingMixins.padding('lg'),
+    },
+
+    // 时间轴
+    timelineItem: {
+        ...flexMixins.flexRow,
+        alignItems: 'center',
+        ...spacingMixins.paddingY('sm'),
+    },
+
+    timelineDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: theme.colors.primary.main,
+        marginRight: theme.spacing.md,
+    },
+
+    timelineContent: {
+        flex: 1,
     },
 
     // 产品网格
@@ -53,6 +82,10 @@ export const createHomeStyles = (theme: Theme) => StyleSheet.create({
         backgroundColor: theme.colors.grey[100],
         borderRadius: theme.borders.radius.lg,
         margin: theme.spacing.sm,
+    },
+
+    productName: {
+        marginTop: theme.spacing.sm,
     },
 
     // 成功提示

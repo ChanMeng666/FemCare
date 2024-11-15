@@ -8,7 +8,12 @@ import { IconButton } from '../components/base/IconButton';
 import { useUsageRecords } from '../hooks/useStorage';
 import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 import { createHomeStyles } from './styles';
-import { createLayoutStyles, createCardStyles } from './styles/common';
+import { createLayoutStyles, createCardStyles } from './styles';
+import {differenceInHours, differenceInMinutes, format, formatDuration} from "date-fns";
+import {ProductType} from "../types";
+import { notificationService } from '../services/notification';
+import { TimelineItem } from '../types/timeline';
+import {getProductIcon, getProductName, ProductIcons, ProductNames} from '../utils/product';
 
 export default function HomeScreen() {
     const theme = useTheme();
@@ -20,6 +25,7 @@ export default function HomeScreen() {
     const { records, addRecord } = useUsageRecords();
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const slideAnim = React.useRef(new Animated.Value(100)).current;
+    const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
 
     // 获取最近的使用记录
     const getLastUsageInfo = () => {
@@ -104,6 +110,18 @@ export default function HomeScreen() {
                 ]).start();
             }, 2000);
         });
+    };
+
+    const scheduleReminder = async () => {
+        await notificationService.scheduleNextReminder();
+    };
+
+    // 格式化持续时间显示
+    const formatDuration = (usage: { hours: number; minutes: number }) => {
+        if (usage.hours > 0) {
+            return `${usage.hours}小时${usage.minutes}分钟`;
+        }
+        return `${usage.minutes}分钟`;
     };
 
     // 渲染状态卡片
@@ -240,7 +258,7 @@ export default function HomeScreen() {
                         <Typography variant="h3" style={cardStyles.cardHeader}>
                             最近记录
                         </Typography>
-                        {timelineData.map((item, index) => (
+                        {getTimelineData.map((item, index) => (
                             <View key={index} style={styles.timelineItem}>
                                 <View style={styles.timelineDot}/>
                                 <View style={styles.timelineContent}>

@@ -1,3 +1,9 @@
+import {Dimensions, StyleSheet} from 'react-native';
+import { Theme } from '../../../styles/theme';
+import {flexMixins, spacingMixins, typographyMixins} from '../../../styles/mixins';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 export const createMetricStyles = (theme: Theme) => StyleSheet.create({
     // 指标卡片
     metricCard: {

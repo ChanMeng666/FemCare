@@ -1,3 +1,7 @@
+import { StyleSheet } from 'react-native';
+import { Theme } from '../../../styles/theme';
+import { flexMixins, spacingMixins } from '../../../styles/mixins';
+
 export const createCardStyles = (theme: Theme) => StyleSheet.create({
     // 基础卡片
     card: {

@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import type { Theme } from '../../../styles/theme';
 import type { StylesProps } from '../';
+import { flexMixins, spacingMixins, shadowMixins } from '../../../styles/mixins';
 
 export const createCalendarStyles = (theme: Theme) => StyleSheet.create({
     // 日历卡片
